@@ -1,3 +1,5 @@
+import 'package:great_places/helpers/location_helper.dart';
+import 'package:great_places/screens/map_screen.dart';
 import 'package:location/location.dart';
 import 'package:flutter/material.dart';
 
@@ -11,11 +13,52 @@ class LocationInput extends StatefulWidget {
 class _LocationInputState extends State<LocationInput> {
   String _previewImageUrl;
   bool _imageUrlFound = false;
+  String _locMessage = null;
 
   Future<void> _getCurrentLocation() async {
     final locData = await Location().getLocation();
-    print(locData.latitude);
-    print(locData.longitude);
+    // print(locData.latitude);
+    // print(locData.longitude);
+
+    setState(() {
+      // _previewImageUrl = LocationHelper.generateLocationPreviewImage(latitude: locData.latitude, longitude:locData.longitude );
+      //
+      _locMessage = 'latitude: ' +
+          locData.latitude.toString() +
+          ' \nlongitude: ' +
+          locData.longitude.toString();
+    });
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Current Location:'),
+        content: Text(_locMessage),
+        actions: <Widget>[
+          TextButton(
+            child: Text('Okay'),
+            onPressed: () {
+              Navigator.of(ctx).pop();
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _selectOnMap() async {
+    final selectedLocation = await Navigator.of(context).push(
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (ctx) => MapScreen(
+          isSelecting: true,
+        ),
+      ),
+    );
+    if (selectedLocation == null) {
+      return;
+    }
+    //........
   }
 
   @override
@@ -33,10 +76,15 @@ class _LocationInputState extends State<LocationInput> {
             ),
           ),
           child: _previewImageUrl == null
-              ? const Text(
-                  'No location chosen',
-                  textAlign: TextAlign.center,
-                )
+              ? _locMessage != null
+                  ? Text(
+                      _locMessage,
+                      textAlign: TextAlign.center,
+                    )
+                  : const Text(
+                      'No location chosen',
+                      textAlign: TextAlign.center,
+                    )
               : Image.network(
                   _previewImageUrl,
                   fit: BoxFit.cover,
@@ -76,7 +124,7 @@ class _LocationInputState extends State<LocationInput> {
                     color: Theme.of(context).primaryColor,
                   )),
               label: const Text('Select on Map'),
-              onPressed: () {},
+              onPressed: _selectOnMap,
             )
           ],
         ),

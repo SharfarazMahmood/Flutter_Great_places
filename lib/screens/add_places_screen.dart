@@ -25,11 +25,11 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('An error occurred'),
+        title: const Text('Some Information\'s missing'),
         content: Text(message),
         actions: <Widget>[
           TextButton(
-            child: Text('Okay'),
+            child: const Text('Okay'),
             onPressed: () {
               Navigator.of(ctx).pop();
             },
