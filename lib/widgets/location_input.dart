@@ -1,10 +1,13 @@
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:great_places/helpers/location_helper.dart';
 import 'package:great_places/screens/map_screen.dart';
 import 'package:location/location.dart';
 import 'package:flutter/material.dart';
 
 class LocationInput extends StatefulWidget {
-  // const LocationInput({Key? key}) : super(key: key);
+  final Function onSelectPlace;
+
+  const LocationInput({this.onSelectPlace});
 
   @override
   _LocationInputState createState() => _LocationInputState();
@@ -15,28 +18,15 @@ class _LocationInputState extends State<LocationInput> {
   bool _imageUrlFound = false;
   String _locMessage = null;
 
-  Future<void> _getCurrentLocation() async {
-    final locData = await Location().getLocation();
-    // print(locData.latitude);
-    // print(locData.longitude);
-
-    setState(() {
-      // _previewImageUrl = LocationHelper.generateLocationPreviewImage(latitude: locData.latitude, longitude:locData.longitude );
-      //
-      _locMessage = 'latitude: ' +
-          locData.latitude.toString() +
-          ' \nlongitude: ' +
-          locData.longitude.toString();
-    });
-
+  void showMessage(message) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Current Location:'),
-        content: Text(_locMessage),
+        content: Text(message),
         actions: <Widget>[
           TextButton(
-            child: Text('Okay'),
+            child: const Text('Okay'),
             onPressed: () {
               Navigator.of(ctx).pop();
             },
@@ -46,8 +36,37 @@ class _LocationInputState extends State<LocationInput> {
     );
   }
 
+  void _showPreview(double lat, double lng) {
+    // final staticMapImageUrl = LocationHelper.generateLocationPreviewImage(
+    //   latitude: lat,
+    //   longitude: lng,
+    // );
+
+    setState(() {
+      // _previewImageUrl = staticMapImageUrl;
+    });
+  }
+
+  Future<void> _getCurrentLocation() async {
+    try {
+      final locData = await Location().getLocation();
+      _showPreview(locData.latitude, locData.longitude);
+
+      _locMessage = 'latitude: ' +
+          locData.latitude.toString() +
+          ' \nlongitude: ' +
+          locData.longitude.toString();
+      showMessage(_locMessage);
+      widget.onSelectPlace(locData.latitude, locData.longitude);
+    } catch (error) {
+      // print(error);
+      showMessage("Unknown Error, Please try again later");
+    }
+  }
+
   Future<void> _selectOnMap() async {
-    final selectedLocation = await Navigator.of(context).push(
+    // final LatLng selectedLocation = await Navigator.of(context).push(
+    final selectedLocation = await Navigator.of(context).push<LatLng>(
       MaterialPageRoute(
         fullscreenDialog: true,
         builder: (ctx) => MapScreen(
@@ -58,6 +77,12 @@ class _LocationInputState extends State<LocationInput> {
     if (selectedLocation == null) {
       return;
     }
+    // print(selectedLocation.latitude);
+
+    print(selectedLocation);
+    _showPreview(selectedLocation.latitude, selectedLocation.longitude);
+    widget.onSelectPlace(selectedLocation.latitude, selectedLocation.longitude);
+
     //........
   }
 

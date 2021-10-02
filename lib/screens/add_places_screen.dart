@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:great_places/models/place.dart';
 import 'package:great_places/widgets/location_input.dart';
 import 'package:provider/provider.dart';
 import '../providers/great_places_provider.dart';
@@ -20,6 +21,7 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
 
   File _pickedImage;
   bool imagePicked = false;
+  PlaceLocation _pickedLocation;
 
   void _showErrorDialog(String message) {
     showDialog(
@@ -44,6 +46,12 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
     imagePicked = true;
   }
 
+  void _selectPlace(double lat, double lng) {
+    _pickedLocation = PlaceLocation(latitude: lat, longitude: lng);
+
+    ///.......
+  }
+
   void _savePlace() {
     String errorMessage = "Unknown Error";
     if (_titleController.text.isEmpty) {
@@ -56,8 +64,15 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
       _showErrorDialog(errorMessage);
       return;
     }
+    /////////////////////////////////////////////
+    //////////////Location check/////////////////
+    if (_pickedLocation == null) {
+      errorMessage = "Select a location";
+      _showErrorDialog(errorMessage);
+      return;
+    }
     Provider.of<GreatPlaces>(context, listen: false)
-        .addPlace(_titleController.text, _pickedImage);
+        .addPlace(_titleController.text, _pickedImage, _pickedLocation);
     Navigator.of(context).pop();
   }
 
@@ -84,7 +99,7 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
                     const SizedBox(height: 10),
                     ImageInput(onSelectImage: _selectImage),
                     const SizedBox(height: 10),
-                    LocationInput(),
+                    LocationInput(onSelectPlace: _selectPlace),
                   ],
                 ),
               ),

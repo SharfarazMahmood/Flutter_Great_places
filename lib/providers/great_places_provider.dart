@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
+import 'package:great_places/helpers/location_helper.dart';
 import 'package:great_places/helpers/sqflite_db_helper.dart';
 import '../models/place.dart';
 
@@ -11,11 +12,26 @@ class GreatPlaces with ChangeNotifier {
     return [..._items];
   }
 
-  void addPlace(String title, File image) {
+  void addPlace(
+    String title,
+    File image,
+    PlaceLocation pickedlocation,
+  ) async {
+    final address = await LocationHelper.getPlaceAddress(
+      pickedlocation.latitude,
+      pickedlocation.longitude,
+    );
+
+    final updatedLocation = PlaceLocation(
+      latitude: pickedlocation.latitude,
+      longitude: pickedlocation.longitude,
+      address: address,
+    );
+
     final newPlace = Place(
       id: DateTime.now().toString(),
       title: title,
-      location: null,
+      location: updatedLocation,
       image: image,
     );
     _items.add(newPlace);
@@ -24,6 +40,9 @@ class GreatPlaces with ChangeNotifier {
       'id': newPlace.id,
       'title': newPlace.title,
       'image': newPlace.image.path,
+      'loc_lat': newPlace.location.latitude,
+      'loc_lng': newPlace.location.longitude,
+      'address': newPlace.location.address,
     });
   }
 
@@ -34,10 +53,18 @@ class GreatPlaces with ChangeNotifier {
               id: item['id'],
               title: item['title'],
               image: File(item['image']),
-              location: null,
+              location: PlaceLocation(
+                latitude: item['loc_lat'],
+                longitude: item['loc_lng'],
+                address: item['address'],
+              ),
             ))
         .toList();
 
     notifyListeners();
+  }
+
+  Place findById(String id) {
+    return _items.firstWhere((place) => place.id == id);
   }
 }
