@@ -1,8 +1,8 @@
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
-import 'package:great_places/helpers/location_helper.dart';
-import 'package:great_places/helpers/sqflite_db_helper.dart';
+import '../helpers/location_helper.dart';
+import '../helpers/sqflite_db_helper.dart';
 import '../models/place.dart';
 
 class GreatPlaces with ChangeNotifier {
@@ -66,5 +66,19 @@ class GreatPlaces with ChangeNotifier {
 
   Place findById(String id) {
     return _items.firstWhere((place) => place.id == id);
+  }
+
+  void removeItem({String id}) async {
+    _items.removeWhere((item) => item.id == id);
+    notifyListeners();
+
+    DBHelper.delete('user_places', id);
+  }
+
+  void deleteAll() async {
+    _items = [];
+    notifyListeners();
+
+    DBHelper.deleteAllPlaces('user_places');
   }
 }
