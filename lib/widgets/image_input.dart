@@ -19,10 +19,11 @@ class _ImageInputState extends State<ImageInput> {
   File _storedImage;
   bool _imageStored = false;
 
-  Future<void> _capture() async {
+
+  Future<void> _capture(ImageSource source) async {
     final imagePicker = ImagePicker();
     final XFile imageFile = await imagePicker.pickImage(
-      source: ImageSource.camera,
+      source: source,
       maxHeight: 600,
     );
 
@@ -43,6 +44,32 @@ class _ImageInputState extends State<ImageInput> {
     final fileName = Path.basename(imageFile.path);
     final savedImage = await _storedImage.copy('${appDir.path}/$fileName');
     widget.onSelectImage(savedImage);
+  }
+
+
+  _selectImage() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Pick Image From'),
+        actions: <Widget>[
+          TextButton(
+            child: const Text('Gallery'),
+            onPressed: () {
+              _capture(ImageSource.gallery);
+              Navigator.of(context).pop();
+            },
+          ),
+          TextButton(
+            child: const Text('Camera'),
+            onPressed: () {
+              _capture(ImageSource.camera);
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -84,7 +111,7 @@ class _ImageInputState extends State<ImageInput> {
               shadowColor: Theme.of(context).accentColor,
             ),
             label: const Text('Capture'),
-            onPressed: _capture,
+            onPressed: _selectImage,
           ),
         ),
       ],
