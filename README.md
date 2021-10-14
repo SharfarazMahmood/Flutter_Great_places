@@ -5,6 +5,7 @@ This is a Flutter Demo project.
 ## Features
 - Add places with images and gps location.
 - Pick images from Galllery or Capture from camera
+- Slide right to delete a place from list
 - View Places
 
 <p>
